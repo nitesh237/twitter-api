@@ -9,7 +9,8 @@ bodyParser = require('body-parser'),
 bcrypt = require('bcryptjs'),
 passport = require('passport'),
 LocalStrategy = require('passport-local').Strategy,
-User = require('./user/User')
+User = require('./user/User'),
+Tweet = require('./tweet/Tweet')
 
 
 global.__root = __dirname + '/'
@@ -63,57 +64,174 @@ app.get("/", (req, res) => {
 	console.log("Inside call back")
 	console.log(req.sessionID)
 })
-app.get('/', (req, res) => {
-  console.log(req.sessionID)
-  res.send(`You got home page!\n`)
-})
-app.post('/register', (req, res) => {
+function requireLogin(req,res,next) {
+	if(!req.user) {
+		return res.send('Login First!')
+	} else {
+		console.log(`logged in as ${req.user.username}`)
+		next()
+	}
+}
+
+app.post('/register', async (req, res) => {
 		
-  
-    //res.send("Missing Values")
-    //console.log(req.body)
-  	console.log("here")
-  	var msg = ""
-   	var hashedPassword = bcrypt.hashSync(req.body.password, 8)
-  	User.findOne({ username: req.body.username }, (err, user) => {
-    	if(err) {
-    		msg +="There was a problem registering the user."
-    	} 
-    if(user) {
-    	msg += "Username Already Exists."
-    }
-  	})
-  	User.create(
+    console.log(req.body)
+  	if(!req.body.username || !req.body.name || !req.body.password) {
+  		return res.send({message: "Missing Values"})
+  	}
+   	
+  	var user = await User.findOne({ username: req.body.username })
+  	//console.log(user)
+  	if(!user)
+  	{
+  		var hashedPassword = bcrypt.hashSync(req.body.password, 8)
+  		var user2 = await User.create(
     	{
     	  	name : req.body.name,
     	    username : req.body.username,
     		password : hashedPassword
-    	},
-    (err, user) => {
-      if (err) {
-      	msg += "There was a problem registering the user."
-      	
-      }
-      msg += "registered successfullly now try logging in."
-    })
-   	res.send(msg)
+    	})
+  		if(user2 && user2.username) {
+  			res.send({message: "Registered Successfully"})
+  		} else {
+  			res.send({error: "Error at server side"})
+  		}	
+  	} else if(user.username){
+  		res.send({message: "User Already Exists!"})
+  	} else {
+  		res.send({error: "Error at server side"})
+  	}
 })
 app.post('/login', passport.authenticate('local'), (req, res) => {
-  	console.log("Inside post Login Callback")
-  	console.log(req.session.passport)
-  	console.log(req.user)
+  	//console.log("Inside post Login Callback")
+  	//console.log(req.session.passport)
+  	//console.log(req.user)
     res.send("LOGGED IN")
 })
-app.get('/authrequired', (req, res) => {
-  console.log('Inside GET /authrequired callback')
-  console.log(`User authenticated? ${req.isAuthenticated()}`)
-  if(req.isAuthenticated()) {
-    res.send('you hit the authentication endpoint\n')
-  } else {
-    res.redirect('/')
-  }
-})
+// app.get('/authrequired', (req, res) => {
+//   console.log('Inside GET /authrequired callback')
+//   console.log(`User authenticated? ${req.isAuthenticated()}`)
+//   if(req.isAuthenticated()) {
+//     res.send('you hit the authentication endpoint\n')
+//   } else {
+//     res.redirect('/')
+//   }
+// })
 //})
+app.get('/logout', requireLogin, (req, res) => {
+	req.session.destroy((err) => {
+		if(err) {
+			res.send(err)
+		} else {
+			res.send("Logout SuccFull")
+		}
+	})
+})
+
+app.post('/follow', requireLogin, async(req, res) => {
+
+
+	if(!req.body.username) {
+		res.send({message: "Missing Values"})
+	}
+  	var from = req.user.username
+  	var to = req.body.username
+  	var user = await User.findOne({username: to})
+  	if(user && user.username) {
+
+  		var entry = await Following.findOne(
+  			{
+  				from: from,
+  				to: to
+  			})
+  		if(entry.from) {
+  			res.send({message: "Already Following"})
+  		} else if(!entry) {
+  			var entry1 = await Following.create(
+    			{
+      				from: from,
+      				to: to
+    			})
+  			if(entry1.from) {
+  				res.send({message: "Followed"})
+  			} else {
+  				res.send({error: "Error at server side"})
+  			}
+  		} else {
+  			res.send({error: "Error at server side"})
+  		}
+  	} else if(user){
+  		res.send({error: "Error at server side"})
+  	} else {
+  		res.send({message: "User doesn't Exists"})
+  	}
+})
+app.post('/unfollow', requireLogin, (req, res) => {
+	if(!req.body.username) {
+		res.send({message: "Missing Values"})
+	}
+    var from = req.user.username
+  	var to = req.body.username
+  	Following.deleteOne(
+    {
+      from: from,
+      to: to,
+    },
+    (err, entry) => {
+    	if (err) {
+    		res.send({error: "Error at server side"})
+    	} else {
+    		res.send({message: "unfollowed"})
+    	}
+    }
+  	)
+})
+app.post('/new', requireLogin, (req, res) => {
+
+	//console.log(req.body)
+	if(!req.body.content) {
+		res.send({message: "Missing Values"})
+	}
+  	Tweet.create(
+    	{
+      		createdBy: req.user.username,
+      		text: req.body.content
+    	},
+    	(err, entry) => {
+      		if (err) {
+      			res.send({error: "error at server side"})
+      		} else {
+      			res.send({message: "Tweeted!"})
+        	}
+      		
+    	}
+  	)
+})
+app.get('/read', requireLogin, (req, res) => {
+  Tweet.find( {createdBy: req.user.username }, (err, tweet) => {
+    if (err || !tweet) {
+    	res.send({message: "no tweets to display"})
+    } else {
+      // return res.status(404).json({
+      //   error: 'Failed to find tweet'
+      // })
+    	console.log(tweet)
+    	res.send(tweet)
+	}
+  })
+})
+app.delete('/tweet', requireLogin, (req, res) => {
+
+  	Tweet.deleteOne({
+    	createdBy: req.user.username
+  	}, err => {
+    	if (err) {
+      	
+    	} else {
+      	
+    	}
+  	})
+})
 app.get("/api/status", (req, res) => {
 	res.send('------SERVER RUNNING----')
 })
