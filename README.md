@@ -26,38 +26,45 @@ The above project is an back end implementation of the application and can be ac
   curl -X POST http://localhost:3000/register -H 'Content-Type: application/json' -d '{"name":"Nitesh Gupta", "username": "nitesh237", "password": "1234"}'
   ```
   **Note:** Registering only creates your account. You will have to log in again to access further functionality.
+  
 - **Logging in**
   ```
   curl -X POST http://localhost:3000/login -c <cookie_name>.txt -H 'Content-Type:application/json' -d '{"username": "nitesh237", "password": "1234"}'
   ```
   **Note:** The file <cookie_name>.txt is created in the current terminal directory. The file saves the session data for the user logged in and this it is necessary to keep the file untouched till one session.
+  
 - **Logging Out**
   ```
   curl -X GET http://localhost:3000/logout -b <cookie_name>.txt
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
+  
 - **Follow Other Users**
   For this example we have assumed there is a user with username `postman`
   ```
   curl -X POST http://localhost:3000/api/user/follow -b <cookie_name>.txt -H 'Content-Type:application/json' -d '{"username": "postman"}'
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
+  
 - **Unfollow Users**
   For this example we have assumed there is a user with username `postman`
   ```
   curl -X POST http://localhost:3000/api/user/unfollow -b <cookie_name>.txt -H 'Content-Type:application/json' -d '{"username": "postman"}'
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
+  
  - **Creating Tweet**
   ```
   curl -X POST http://localhost:3000/api/tweet/new -b <cookie_name>.txt -H 'Content-Type:application/json' -d '{"text": "My First Tweet"}'
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
+  
  - **Reading your own tweets**
   ```
   curl -X GET http://localhost:3000/api/tweet/mytweets -b <cookie_name>.txt
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
+  
  - **Deleting Tweets**
   ```
   curl -X DELETE http://localhost:3000/api/tweet/<tweet_id> -b <cookie_name>.txt
