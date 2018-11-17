@@ -2,6 +2,7 @@ const express = require("express"),
 mongoose = require("mongoose"),
 app =  express(),
 config = require('./config'),
+<<<<<<< HEAD
 // session = require('express-session'),
 // uuid = require('uuid/v4'),
 //mongoStore = require('connect-mongo')(session),
@@ -11,6 +12,16 @@ config = require('./config'),
 // LocalStrategy = require('passport-local').Strategy,
 User = require('./user/User'),
 Tweet = require('./tweet/Tweet')
+=======
+session = require('express-session'),
+uuid = require('uuid/v4'),
+mongoStore = require('connect-mongo')(session),
+bodyParser = require('body-parser'),
+bcrypt = require('bcryptjs'),
+passport = require('passport'),
+LocalStrategy = require('passport-local').Strategy,
+User = require('./user/User')
+>>>>>>> parent of cab031d... Till - Extended
 
 
 global.__root = __dirname + '/'
@@ -64,6 +75,7 @@ app.get("/", (req, res) => {
 	console.log("Inside call back")
 	console.log(req.sessionID)
 })
+<<<<<<< HEAD
 function requireLogin(req,res,next) {
 	if(!req.user) {
 		return res.send('Login First!')
@@ -231,7 +243,59 @@ app.delete('/tweet', requireLogin, (req, res) => {
       	
     	}
   	})
+=======
+app.get('/', (req, res) => {
+  console.log(req.sessionID)
+  res.send(`You got home page!\n`)
 })
+app.post('/register', (req, res) => {
+		
+  
+    //res.send("Missing Values")
+    //console.log(req.body)
+  	console.log("here")
+  	var msg = ""
+   	var hashedPassword = bcrypt.hashSync(req.body.password, 8)
+  	User.findOne({ username: req.body.username }, (err, user) => {
+    	if(err) {
+    		msg +="There was a problem registering the user."
+    	} 
+    if(user) {
+    	msg += "Username Already Exists."
+    }
+  	})
+  	User.create(
+    	{
+    	  	name : req.body.name,
+    	    username : req.body.username,
+    		password : hashedPassword
+    	},
+    (err, user) => {
+      if (err) {
+      	msg += "There was a problem registering the user."
+      	
+      }
+      msg += "registered successfullly now try logging in."
+    })
+   	res.send(msg)
+})
+app.post('/login', passport.authenticate('local'), (req, res) => {
+  	console.log("Inside post Login Callback")
+  	console.log(req.session.passport)
+  	console.log(req.user)
+    res.send("LOGGED IN")
+})
+app.get('/authrequired', (req, res) => {
+  console.log('Inside GET /authrequired callback')
+  console.log(`User authenticated? ${req.isAuthenticated()}`)
+  if(req.isAuthenticated()) {
+    res.send('you hit the authentication endpoint\n')
+  } else {
+    res.redirect('/')
+  }
+>>>>>>> parent of cab031d... Till - Extended
+})
+//})
 app.get("/api/status", (req, res) => {
 	res.send('------SERVER RUNNING----')
 })
