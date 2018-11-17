@@ -53,19 +53,19 @@ The above project is an back end implementation of the application and can be ac
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
- - **Creating Tweet**
+- **Creating Tweet**
   ```
   curl -X POST http://localhost:3000/api/tweet/new -b <cookie_name>.txt -H 'Content-Type:application/json' -d '{"text": "My First Tweet"}'
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
- - **Reading your own tweets**
+- **Reading your own tweets**
   ```
   curl -X GET http://localhost:3000/api/tweet/mytweets -b <cookie_name>.txt
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
- - **Deleting Tweets**
+- **Deleting Tweets**
   ```
   curl -X DELETE http://localhost:3000/api/tweet/<tweet_id> -b <cookie_name>.txt
   ```
