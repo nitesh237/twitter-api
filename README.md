@@ -40,6 +40,7 @@ The above project is an back end implementation of the application and can be ac
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
 - **Follow Other Users**
+
   For this example we have assumed there is a user with username `postman`
   ```
   curl -X POST http://localhost:3000/user/follow -b <cookie_name>.txt -H 'Content-Type:application/json' -d '{"username": "postman"}'
@@ -47,6 +48,7 @@ The above project is an back end implementation of the application and can be ac
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
 - **Unfollow Users**
+
   For this example we have assumed there is a user with username `postman`
   ```
   curl -X POST http://localhost:3000/user/unfollow -b <cookie_name>.txt -H 'Content-Type:application/json' -d '{"username": "postman"}'
@@ -78,6 +80,7 @@ The above project is an back end implementation of the application and can be ac
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
 - **Reading your newsfeeds**
+
   This will return tweet of all the people that are followed by the user.
   ```
   curl -X GET http://localhost:3000/tweet/newsfeed -b <cookie_name>.txt
@@ -92,7 +95,7 @@ The above project is an back end implementation of the application and can be ac
 
 ## Usage
 
-Modify the configs in `config.js` as per your need and make sure Mogodb server is on.
+Open the folder in terminal. Modify the configs in `config.js` as per your need and make sure you have mongoDB installed on your system
 
 - **Install dependencies**
     
