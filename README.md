@@ -42,51 +42,51 @@ The above project is an back end implementation of the application and can be ac
 - **Follow Other Users**
   For this example we have assumed there is a user with username `postman`
   ```
-  curl -X POST http://localhost:3000/api/user/follow -b <cookie_name>.txt -H 'Content-Type:application/json' -d '{"username": "postman"}'
+  curl -X POST http://localhost:3000/user/follow -b <cookie_name>.txt -H 'Content-Type:application/json' -d '{"username": "postman"}'
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
 - **Unfollow Users**
   For this example we have assumed there is a user with username `postman`
   ```
-  curl -X POST http://localhost:3000/api/user/unfollow -b <cookie_name>.txt -H 'Content-Type:application/json' -d '{"username": "postman"}'
+  curl -X POST http://localhost:3000/user/unfollow -b <cookie_name>.txt -H 'Content-Type:application/json' -d '{"username": "postman"}'
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
 - **Get Followers**
   ```
-  curl -X POST http://localhost:3000/api/user/followers -b <cookie_name>.txt
+  curl -X POST http://localhost:3000/user/followers -b <cookie_name>.txt
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
 - **Get Followings**
   ```
-  curl -X POST http://localhost:3000/api/user/following -b <cookie_name>.txt
+  curl -X POST http://localhost:3000/user/following -b <cookie_name>.txt
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
 - **Creating Tweet**
   ```
-  curl -X POST http://localhost:3000/api/tweet/new -b <cookie_name>.txt -H 'Content-Type:application/json' -d '{"text": "My First Tweet"}'
+  curl -X POST http://localhost:3000/tweet/new -b <cookie_name>.txt -H 'Content-Type:application/json' -d '{"text": "My First Tweet"}'
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
 - **Reading your own tweets**
   ```
-  curl -X GET http://localhost:3000/api/tweet/mytweets -b <cookie_name>.txt
+  curl -X GET http://localhost:3000/tweet/mytweets -b <cookie_name>.txt
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
 - **Reading your newsfeeds**
   This will return tweet of all the people that are followed by the user.
   ```
-  curl -X GET http://localhost:3000/api/tweet/newsfeed -b <cookie_name>.txt
+  curl -X GET http://localhost:3000/tweet/newsfeed -b <cookie_name>.txt
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
 - **Deleting Tweets**
   ```
-  curl -X DELETE http://localhost:3000/api/tweet/<tweet_id> -b <cookie_name>.txt
+  curl -X DELETE http://localhost:3000/tweet/<tweet_id> -b <cookie_name>.txt
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in. <Tweet-Id> shall be among the _id property of tweets return by mytweets api call.
 
