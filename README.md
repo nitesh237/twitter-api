@@ -53,6 +53,18 @@ The above project is an back end implementation of the application and can be ac
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
+- **Get Followers**
+  ```
+  curl -X POST http://localhost:3000/api/user/followers -b <cookie_name>.txt
+  ```
+  **Note:** The file <cookie_name.txt> should be same as used during logging in.
+  
+- **Get Followings**
+  ```
+  curl -X POST http://localhost:3000/api/user/following -b <cookie_name>.txt
+  ```
+  **Note:** The file <cookie_name.txt> should be same as used during logging in.
+  
 - **Creating Tweet**
   ```
   curl -X POST http://localhost:3000/api/tweet/new -b <cookie_name>.txt -H 'Content-Type:application/json' -d '{"text": "My First Tweet"}'
@@ -62,6 +74,13 @@ The above project is an back end implementation of the application and can be ac
 - **Reading your own tweets**
   ```
   curl -X GET http://localhost:3000/api/tweet/mytweets -b <cookie_name>.txt
+  ```
+  **Note:** The file <cookie_name.txt> should be same as used during logging in.
+  
+- **Reading your newsfeeds**
+  This will return tweet of all the people that are followed by the user.
+  ```
+  curl -X GET http://localhost:3000/api/tweet/newsfeed -b <cookie_name>.txt
   ```
   **Note:** The file <cookie_name.txt> should be same as used during logging in.
   
