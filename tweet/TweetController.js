@@ -5,14 +5,22 @@ router.use(bodyParser.urlencoded({ extended: true }))
 router.use(bodyParser.json())
 const Tweets = require('./Tweet')
 const Followings = require('../user/Followings')
+/*
+* Middle Wear to check whether the user is logged in and authenticated
+*/
 function requireLogin(req,res,next) {
-	if(!req.user) {
+	if(!req.user) { //req.user contains the information of current user incase authenticated.
 		return res.status(401).json({message: "Login First!"})
-	} else {
+	} else { 
 		console.log(`logged in as ${req.user.username}`)
 		next()
 	}
 }
+/*
+* post route for '/tweet/new'
+* using require login as middle wear
+* Creates new entry in tweets schema
+*/
 router.post('/new', requireLogin, (req, res) => {
 
 	//console.log(req.body)
@@ -34,6 +42,11 @@ router.post('/new', requireLogin, (req, res) => {
     	}
   	)
 })
+/*
+* get route for '/tweet/mytweets'
+* using require login as middle wear
+* returns an array of tweets objects of user logged in
+*/
 router.get('/mytweets', requireLogin, (req, res) => {
   Tweets.find( {createdBy: req.user.username }, (err, tweet) => {
     if (err) {
@@ -45,23 +58,24 @@ router.get('/mytweets', requireLogin, (req, res) => {
     }
   })
 })
+/*
+* get route for '/tweet/newsfeed'
+* using require login as middle wear
+* returns an array of tweets objects of followed users
+*/
 router.get('/newsfeed', requireLogin, async(req, res) => {
 
   var following = await Followings.find({from: req.user.username })
   if(following &&  following.length > 0) {
-    //console.log("here")
     var tweets_final = []
     for(i = 0; i < following.length; i++) {
-      //console.log(following[i].to)
       var tweets = await Tweets.find({createdBy: following[i].to})
-      //console.log(tweets.length)
       if(tweets && tweets.length >= 0) {
         tweets_final = tweets_final.concat(tweets)
       } else if(tweets) {
         return res.status(500).json({error: "error at server side1"})
       }
     }
-    //console.log(tweets_final)
     res.send(tweets_final)
   } else if(following && following.length === 0) {
     return res.status(400).json({message: "Not following anyone"})
@@ -69,8 +83,12 @@ router.get('/newsfeed', requireLogin, async(req, res) => {
     return res.status(500).json({error: "error at server side"})
   }
 })
+/*
+* delete route for '/tweet/'
+* using require login as middle wear
+* deletes entry from tweets schema created by current and having _id specified in req
+*/
 router.delete('/:id', requireLogin, (req, res) => {
-    //console.log(req.params)
   	Tweets.deleteOne({
     	_id : req.params.id,
       createdBy: req.user.username

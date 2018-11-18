@@ -5,15 +5,22 @@ router.use(bodyParser.urlencoded({ extended: true }))
 router.use(bodyParser.json())
 var User = require('./User')
 var Followings = require('./Followings')
+/*
+* Middle Wear to check whether the user is logged in and authenticated
+*/
 function requireLogin(req,res,next) {
-  if(!req.user) {
+  if(!req.user) { //req.user contains the information of current user incase authenticated.
     return res.status(401).json({message: "Login First!"})
   } else {
     console.log(`logged in as ${req.user.username}`)
     next()
   }
 }
-
+/*
+* Post route '/user/follow' 
+* using require login as middle wear
+* creates an entry in the table following if the user is not followed earlier
+*/
 router.post('/follow', requireLogin, async(req, res) => {
 
 
@@ -52,6 +59,11 @@ router.post('/follow', requireLogin, async(req, res) => {
   		return res.status(400).json({message: "User doesn't Exists"})
   	}
 })
+/*
+* Post route '/user/unfollow' 
+* using require login as middle wear
+* deletes an entry in the table following 
+*/
 router.post('/unfollow', requireLogin, (req, res) => {
 	if(!req.body.username) {
 		return res.status(400).json({message: "Missing Values"})
@@ -72,6 +84,11 @@ router.post('/unfollow', requireLogin, (req, res) => {
     }
   	)
 })
+/*
+* Post route '/user/following' 
+* using require login as middle wear
+* returns an array of entry from followings, where from: has value equal to current user
+*/
 router.get('/following', requireLogin, (req, res) => {
   Followings.find( {from: req.user.username }, (err, following) => {
     if (err) {
@@ -83,6 +100,11 @@ router.get('/following', requireLogin, (req, res) => {
     }
   })
 })
+/*
+* Post route '/user/followers' 
+* using require login as middle wear
+* returns an array of entry from followings, where to: has value equal to current user
+*/
 router.get('/followers', requireLogin, (req, res) => {
   Followings.find( {to: req.user.username }, (err, followers) => {
     if (err) {
