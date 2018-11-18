@@ -14,29 +14,29 @@ User = require('./user/User')
 
 
 global.__root = __dirname + '/'
-mongoose.connect("mongodb://localhost:27017/twitter-api-app", {useNewUrlParser: true})
+mongoose.connect(config.dbURL, {useNewUrlParser: true})
 passport.use(new LocalStrategy(
   (username, password, done) => {
-    console.log('Inside local strategy callback')
+    //console.log('Inside local strategy callback')
     User.findOne({ username: username }, (err, user) => {
     	if (err) { return done(err) }
     	if (!user) { return done(null, false) }
     	var passwordIsValid = bcrypt.compareSync(password, user.password)
     	if (!passwordIsValid) { return done(null, false) }
-    	console.log('Local strategy returned true')
+    	//console.log('Local strategy returned true')
     	return done(null, user)
     })
    }
 ))
 
 passport.serializeUser((user, done) => {
-  console.log('Inside serializeUser callback. User username is save to the session file store here')
+  //console.log('Inside serializeUser callback. User username is save to the session file store here')
   done(null, user.username);
 })
 
 passport.deserializeUser((username, done) => {
   //console.log('Inside deserializeUser callback')
-  console.log(`The user name passport saved in the session file store is: ${username}`)
+  //console.log(`The user name passport saved in the session file store is: ${username}`)
   User.findOne({username: username}, (err, user) => {
   	if (err) { return done(err) }
     	if (!user) { return done(null, false) }
@@ -51,7 +51,7 @@ app.use(session({
     return uuid() 
   },
   store: new mongoStore({ mongooseConnection: mongoose.connection, autoRemove: 'interval', autoRemoveInterval: 120 }),
-  secret: 'supersecretkey',
+  secret: config.secret,
   resave: false,
   saveUninitialized: true
 }))
@@ -59,9 +59,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.get("/", (req, res) => {
 
-	res.send(`Hello`)
-	console.log("Inside call back")
-	console.log(req.sessionID)
+	res.status(200).json({message: "welcome home"})
+	
 })
 function requireLogin(req,res,next) {
 	if(!req.user) {
@@ -118,8 +117,6 @@ app.get('/logout', requireLogin, (req, res) => {
 app.get("/api/status", (req, res) => {
 	res.send('------SERVER RUNNING----')
 })
-// const AuthController = require(__root + 'auth/AuthController')
-// app.use('/api/auth', AuthController)
 
 const UserController = require(__root + 'user/UserController')
 app.use('/api/user', UserController)
@@ -128,8 +125,8 @@ const TweetController = require(__root + 'tweet/TweetController')
 app.use('/api/tweet', TweetController)
 
 let port = config.port
-app.listen(3000, () => {
-  console.log(`Starting on port ${3000}`)
+app.listen(port, () => {
+  console.log(`Starting on port ${port}`)
 })
 
 module.exports = app

@@ -72,4 +72,26 @@ router.post('/unfollow', requireLogin, (req, res) => {
     }
   	)
 })
+router.get('/following', requireLogin, (req, res) => {
+  Followings.find( {from: req.user.username }, (err, following) => {
+    if (err) {
+      res.send({error: "error at server side"})
+    } else if (following && following.length === 0){ 
+      res.send({message: "not following anyone"})
+    } else {
+      res.send(following)
+    }
+  })
+})
+router.get('/followers', requireLogin, (req, res) => {
+  Followings.find( {to: req.user.username }, (err, followers) => {
+    if (err) {
+      res.send({error: "error at server side"})
+    } else if (followers && followers.length === 0){ 
+      res.send({message: "not following anyone"})
+    } else {
+      res.send(followers)
+    }
+  })
+})
 module.exports = router

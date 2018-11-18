@@ -4,6 +4,7 @@ var bodyParser = require('body-parser')
 router.use(bodyParser.urlencoded({ extended: true }))
 router.use(bodyParser.json())
 const Tweets = require('./Tweet')
+const Followings = require('../user/Followings')
 function requireLogin(req,res,next) {
 	if(!req.user) {
 		return res.send('Login First!')
@@ -34,7 +35,7 @@ router.post('/new', requireLogin, (req, res) => {
   	)
 })
 router.get('/mytweets', requireLogin, (req, res) => {
-  Tweets.findOne( {createdBy: req.user.username }, (err, tweet) => {
+  Tweets.find( {createdBy: req.user.username }, (err, tweet) => {
     if (err || !tweet) {
     	res.send({message: "no tweets to display"})
     } else {
@@ -46,10 +47,35 @@ router.get('/mytweets', requireLogin, (req, res) => {
 	}
   })
 })
-router.delete('/tweet', requireLogin, (req, res) => {
+router.get('/newsfeed', requireLogin, async(req, res) => {
 
+  var following = await Followings.find({from: req.user.username })
+  if(following &&  following.length > 0) {
+    console.log("here")
+    var tweets_final = []
+    for(i = 0; i < following.length; i++) {
+      //console.log(following[i].to)
+      var tweets = await Tweets.find({createdBy: following[i].to})
+      //console.log(tweets.length)
+      if(tweets && tweets.length >= 0) {
+        tweets_final = tweets_final.concat(tweets)
+      } else if(tweets) {
+        res.send({error: "error at server side1"})
+      }
+    }
+    //console.log(tweets_final)
+    res.send(tweets_final)
+  } else if(following && following.length === 0) {
+    res.send({message: "Not following anyone"})
+  } else {
+    res.send({error: "error at server side"})
+  }
+})
+router.delete('/:id', requireLogin, (req, res) => {
+    //console.log(req.params)
   	Tweets.deleteOne({
-    	_id : req.params.id
+    	_id : req.params.id,
+      createdBy: req.user.username
   	}, err => {
     	if (err) {
         res.send({error: "error at server side"})
