@@ -63,19 +63,19 @@ app.get("/", (req, res) => {
 	
 })
 function requireLogin(req,res,next) {
-	if(!req.user) {
-		return res.send('Login First!')
-	} else {
-		console.log(`logged in as ${req.user.username}`)
-		next()
-	}
+  if(!req.user) {
+    return res.status(401).json({message: "Login First!"})
+  } else {
+    console.log(`logged in as ${req.user.username}`)
+    next()
+  }
 }
 
 app.post('/register', async (req, res) => {
 		
-    console.log(req.body)
+    //console.log(req.body)
   	if(!req.body.username || !req.body.name || !req.body.password) {
-  		return res.send({message: "Missing Values"})
+  		 return res.status(400).json({message: "Missing Values"})
   	}
    	
   	var user = await User.findOne({ username: req.body.username })
@@ -90,26 +90,26 @@ app.post('/register', async (req, res) => {
     		password : hashedPassword
     	})
   		if(user2 && user2.username) {
-  			res.send({message: "Registered Successfully"})
+  			return res.status(201).json({message: "Registered Successfully"})
   		} else {
-  			res.send({error: "Error at server side"})
+  			return res.status(500).json({error: "Error at server side"})
   		}	
   	} else if(user.username){
-  		res.send({message: "User Already Exists!"})
+  		 return res.status(409).json({message: "User Already Exists!"})
   	} else {
-  		res.send({error: "Error at server side"})
+  		return res.status(500).json({error: "Error at server side"})
   	}
 })
 app.post('/login', passport.authenticate('local'), (req, res) => {
-    res.send("LOGGED IN")
+    res.status(200).json({message: "LOGGED IN"})
 })
 
 app.get('/logout', requireLogin, (req, res) => {
 	req.session.destroy((err) => {
 		if(err) {
-			res.send(err)
+			res.status(500).json({error: "Error at server side"})
 		} else {
-			res.send("Logout SuccFull")
+			res.status(200).json({message: "Logout SuccFull"})
 		}
 	})
 })
@@ -119,10 +119,10 @@ app.get("/api/status", (req, res) => {
 })
 
 const UserController = require(__root + 'user/UserController')
-app.use('/api/user', UserController)
+app.use('/user', UserController)
 
 const TweetController = require(__root + 'tweet/TweetController')
-app.use('/api/tweet', TweetController)
+app.use('/tweet', TweetController)
 
 let port = config.port
 app.listen(port, () => {

@@ -7,7 +7,7 @@ const Tweets = require('./Tweet')
 const Followings = require('../user/Followings')
 function requireLogin(req,res,next) {
 	if(!req.user) {
-		return res.send('Login First!')
+		return res.status(401).json({message: "Login First!"})
 	} else {
 		console.log(`logged in as ${req.user.username}`)
 		next()
@@ -17,7 +17,7 @@ router.post('/new', requireLogin, (req, res) => {
 
 	//console.log(req.body)
 	if(!req.body.text) {
-		res.send({message: "Missing Values"})
+		return res.status(400).json({message: "Missing Values"})
 	}
   	Tweets.create(
     	{
@@ -26,9 +26,9 @@ router.post('/new', requireLogin, (req, res) => {
     	},
     	(err, entry) => {
       		if (err) {
-      			res.send({error: "error at server side"})
+      			return res.status(500).json({error: "error at server side"})
       		} else {
-      			res.send({message: "Tweeted!"})
+      			return res.status(201).json({message: "Tweeted!"})
         	}
       		
     	}
@@ -36,22 +36,20 @@ router.post('/new', requireLogin, (req, res) => {
 })
 router.get('/mytweets', requireLogin, (req, res) => {
   Tweets.find( {createdBy: req.user.username }, (err, tweet) => {
-    if (err || !tweet) {
-    	res.send({message: "no tweets to display"})
+    if (err) {
+      return res.status(500).json({error: "error at server side"})
+    } else if (tweet && tweet.length === 0){ 
+      return res.status(400).json({message: "No Tweets to show"})
     } else {
-      // return res.status(404).json({
-      //   error: 'Failed to find tweet'
-      // })
-      console.log(tweet)
-    	res.send(tweet)
-	}
+      res.send(tweet)
+    }
   })
 })
 router.get('/newsfeed', requireLogin, async(req, res) => {
 
   var following = await Followings.find({from: req.user.username })
   if(following &&  following.length > 0) {
-    console.log("here")
+    //console.log("here")
     var tweets_final = []
     for(i = 0; i < following.length; i++) {
       //console.log(following[i].to)
@@ -60,15 +58,15 @@ router.get('/newsfeed', requireLogin, async(req, res) => {
       if(tweets && tweets.length >= 0) {
         tweets_final = tweets_final.concat(tweets)
       } else if(tweets) {
-        res.send({error: "error at server side1"})
+        return res.status(500).json({error: "error at server side1"})
       }
     }
     //console.log(tweets_final)
     res.send(tweets_final)
   } else if(following && following.length === 0) {
-    res.send({message: "Not following anyone"})
+    return res.status(400).json({message: "Not following anyone"})
   } else {
-    res.send({error: "error at server side"})
+    return res.status(500).json({error: "error at server side"})
   }
 })
 router.delete('/:id', requireLogin, (req, res) => {
@@ -78,9 +76,9 @@ router.delete('/:id', requireLogin, (req, res) => {
       createdBy: req.user.username
   	}, err => {
     	if (err) {
-        res.send({error: "error at server side"})
+        return res.status(500).json({error: "error at server side"})
     	} else {
-        res.send({message: "Deleted"})
+        return res.status(200).json({message: "Deleted"})
     	}
   	})
 })

@@ -6,19 +6,19 @@ router.use(bodyParser.json())
 var User = require('./User')
 var Followings = require('./Followings')
 function requireLogin(req,res,next) {
-	if(!req.user) {
-		return res.send('Login First!')
-	} else {
-		console.log(`logged in as ${req.user.username}`)
-		next()
-	}
+  if(!req.user) {
+    return res.status(401).json({message: "Login First!"})
+  } else {
+    console.log(`logged in as ${req.user.username}`)
+    next()
+  }
 }
 
 router.post('/follow', requireLogin, async(req, res) => {
 
 
 	if(!req.body.username) {
-		res.send({message: "Missing Values"})
+		return res.status(400).json({message: "Missing Values"})
 	}
   	var from = req.user.username
   	var to = req.body.username
@@ -31,7 +31,7 @@ router.post('/follow', requireLogin, async(req, res) => {
   				to: to
   			})
   		if(entry && entry.from) {
-  			res.send({message: "Already Following"})
+  			return res.status(409).json({message: "Already Following"})
   		} else if(!entry) {
   			var entry1 = await Followings.create(
     			{
@@ -39,22 +39,22 @@ router.post('/follow', requireLogin, async(req, res) => {
       				to: to
     			})
   			if(entry1 && entry1.from) {
-  				res.send({message: "Followed"})
+  				return res.status(201).json({message: "Followed"})
   			} else {
-  				res.send({error: "Error at server side"})
+  				return res.status(500).json({error: "Error at server side"})
   			}
   		} else {
-  			res.send({error: "Error at server side"})
+  			return res.status(500).json({error: "Error at server side"})
   		}
-  	} else if(user){
-  		res.send({error: "Error at server side"})
+  	} else if(user){ 
+  		return res.status(500).json({error: "Error at server side"})
   	} else {
-  		res.send({message: "User doesn't Exists"})
+  		return res.status(400).json({message: "User doesn't Exists"})
   	}
 })
 router.post('/unfollow', requireLogin, (req, res) => {
 	if(!req.body.username) {
-		res.send({message: "Missing Values"})
+		return res.status(400).json({message: "Missing Values"})
 	}
     var from = req.user.username
   	var to = req.body.username
@@ -65,9 +65,9 @@ router.post('/unfollow', requireLogin, (req, res) => {
     },
     (err, entry) => {
     	if (err) {
-    		res.send({error: "Error at server side"})
+    		return res.status(500).json({error: "Error at server side"})
     	} else {
-    		res.send({message: "unfollowed"})
+    		return res.status(200).json({message: "unfollowed"})
     	}
     }
   	)
@@ -75,9 +75,9 @@ router.post('/unfollow', requireLogin, (req, res) => {
 router.get('/following', requireLogin, (req, res) => {
   Followings.find( {from: req.user.username }, (err, following) => {
     if (err) {
-      res.send({error: "error at server side"})
+      return res.status(500).json({error: "error at server side"})
     } else if (following && following.length === 0){ 
-      res.send({message: "not following anyone"})
+      return res.status(400).json({message: "not following anyone"})
     } else {
       res.send(following)
     }
@@ -86,9 +86,9 @@ router.get('/following', requireLogin, (req, res) => {
 router.get('/followers', requireLogin, (req, res) => {
   Followings.find( {to: req.user.username }, (err, followers) => {
     if (err) {
-      res.send({error: "error at server side"})
+      return res.status(500).json({error: "error at server side"})
     } else if (followers && followers.length === 0){ 
-      res.send({message: "not following anyone"})
+      return res.status(400).json({message: "not following anyone"})
     } else {
       res.send(followers)
     }
