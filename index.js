@@ -18,7 +18,7 @@ User = require('./user/User')
 
 
 global.__root = __dirname + '/'
-mongoose.connect(config.dbURL, {useNewUrlParser: true})
+mongoose.connect(config.dbURL, {useNewUrlParser: true}) //creates a connection to mongodb at dbURL specified in config js
 /*
 *   Defines a local strategy based on which users are authenticated
 */
